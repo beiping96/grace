@@ -1,23 +1,21 @@
 package grace
 
 import (
-	"os"
+	"context"
+	"syscall"
 	"testing"
 )
 
-func TestInit(t *testing.T) {
-	type args struct {
-		stopSignals []os.Signal
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			Init(tt.args.stopSignals...)
+func TestStop(t *testing.T) {
+	Init(syscall.SIGTERM)
+	Go(func(ctx context.Context) {
+		t.Log("backend goroutine running")
+	})
+	Go(func(ctx context.Context) {
+		t.Log("backend goroutine running")
+		Go(func(ctx context.Context) {
+			t.Log("dynamic goroutine running")
 		})
-	}
+	})
+	Run()
 }

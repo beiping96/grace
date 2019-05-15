@@ -2,9 +2,12 @@ package grace
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
 var (
@@ -19,7 +22,7 @@ var (
 // Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
 func Init(stopSignals ...os.Signal) {
 	if len(stopSignals) == 0 {
-		panic("beiping96/grace Init PANIC nil stopSignals")
+		panic("GRACE Init PANIC nil stopSignals")
 	}
 	defaultStopSignal = stopSignals
 }
@@ -39,8 +42,8 @@ type Goroutine func(ctx context.Context)
 // Go Start a goroutine
 func Go(g Goroutine) {
 	if isRunning {
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			defer wg.Done()
 			g(ctx)
 		}()
@@ -57,8 +60,34 @@ func Run() {
 	defer mu.Unlock()
 	isRunning = true
 	ctx, cancel = context.WithCancel(context.Background())
+	for _, g := range sysGoroutines {
+		wg.Add(1)
+		go func(goroutine Goroutine) {
+			defer wg.Done()
+			goroutine(ctx)
+		}(g)
+	}
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, defaultStopSignal...)
+	allStopped := make(chan struct{})
 	go func() {
-		cancel()
+		wg.Wait()
+		allStopped <- struct{}{}
 	}()
-	wg.Wait()
+	defer cancel()
+	select {
+	case s := <-signalChan:
+		fmt.Printf("GRACE receive stop signal %s \n", s)
+		cancel()
+		fmt.Printf("GRACE waitting all goroutines exit...\n")
+		select {
+		case <-time.After(time.Duration(5) * time.Second):
+		case <-allStopped:
+		}
+		fmt.Printf("GRACE stopped.\n")
+	case <-allStopped:
+		fmt.Printf("GRACE all goroutines exit...\n")
+		fmt.Printf("GRACE stopped.\n")
+	}
+	os.Exit(0)
 }
