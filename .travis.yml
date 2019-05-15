@@ -1,14 +1,10 @@
+sudo: false
 language: go
 
 go:
   - master
 
 install: true
-
-matrix:
-  allow_failures:
-    - go: master
-  fast_finish: true
 
 notifications:
   email: false
