@@ -4,16 +4,18 @@ language: go
 go:
   - master
 
-install: true
-
 notifications:
   email: false
 
+before_install:
+  - go get -t -v ./...
+
 before_script:
-  - go get honnef.co/go/tools/cmd/megacheck
   - go get github.com/mattn/goveralls
 
 script:
-  - go test -v -race ./...
-  - megacheck ./...
+  - ./coverage.sh
   - goveralls
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
