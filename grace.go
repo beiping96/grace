@@ -13,6 +13,6 @@ type Config struct {
 
 func Init(cfg *Config) {}
 
-func Go(name string, fn func(ctx context.Context)) {}
+func Go(fn func(ctx context.Context)) {}
 
 func Run() {}
