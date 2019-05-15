@@ -14,7 +14,13 @@ before_install:
   - go get -t -v ./...
 
 script:
-  - go test -race -coverprofile=coverage.txt -covermode=atomic
-
-after_success:
+  - echo "" > coverage.txt	  - go test -race -coverprofile=coverage.txt -covermode=atomic
+  - for d in $(go list ./... | grep -v vendor); do
+    go test -v -race -coverprofile=profile.out -covermode=atomic $d;
+    if [ -f profile.out ]; then
+    cat profile.out >> coverage.txt;
+    rm profile.out;
+    fi;
+    done;
   - bash <(curl -s https://codecov.io/bash)
+  - rm coverage.txt
