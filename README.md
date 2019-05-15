@@ -1,7 +1,7 @@
 # Grace
 
-[![GoDoc](https://godoc.org/github.com/beiping96/grace?status.svg)](https://godoc.org/github.com/beiping96/grace)
 [![Build Status](https://travis-ci.com/beiping96/grace.svg?branch=master)](https://travis-ci.com/beiping96/grace)
+[![GoDoc](https://godoc.org/github.com/beiping96/grace?status.svg)](https://godoc.org/github.com/beiping96/grace)
 [![Go Report Card](https://goreportcard.com/badge/github.com/beiping96/grace)](https://goreportcard.com/report/github.com/beiping96/grace)
 
 A graceful way to manage node and goroutines.
