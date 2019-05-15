@@ -61,3 +61,10 @@ func manager1(ctx context.Context) {
 func do(work interface{}) {}
 
 ```
+
+## TODO
+
+- [x] Stop
+- [ ] Handle Stop
+- [ ] Restart
+- [ ] Handle Restart
