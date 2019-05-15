@@ -1,10 +1,13 @@
 package grace
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestInit(t *testing.T) {
 	type args struct {
-		cfg *Config
+		stopSignals []os.Signal
 	}
 	tests := []struct {
 		name string
@@ -14,7 +17,7 @@ func TestInit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Init(tt.args.cfg)
+			Init(tt.args.stopSignals...)
 		})
 	}
 }

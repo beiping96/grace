@@ -11,11 +11,12 @@ var (
 	defaultStopSignal = []os.Signal{
 		syscall.SIGINT,
 		syscall.SIGQUIT,
+		syscall.SIGTERM,
 	}
 )
 
 // Init Declare stop signals
-// Default is syscall.SIGINT or syscall.SIGQUIT
+// Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
 func Init(stopSignals ...os.Signal) {
 	if len(stopSignals) == 0 {
 		panic("beiping96/grace Init PANIC nil stopSignals")
@@ -57,7 +58,7 @@ func Run() {
 	isRunning = true
 	ctx, cancel = context.WithCancel(context.Background())
 	go func() {
-
+		cancel()
 	}()
 	wg.Wait()
 }
