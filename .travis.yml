@@ -3,4 +3,21 @@ language: go
 go:
   - master
 
-script: go test -v -race ./...
+install: true
+
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+
+notifications:
+  email: false
+
+before_script:
+  - go get honnef.co/go/tools/cmd/megacheck
+  - go get github.com/mattn/goveralls
+
+script:
+  - go test -v -race ./...
+  - megacheck ./...
+  - goveralls
