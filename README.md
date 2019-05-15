@@ -12,16 +12,20 @@ A graceful way to manage node and goroutines.
 ``` go
 import (
     "context"
+    "syscall"
     "github.com/beiping96/grace"
 )
 
-func init() {
-    grace.Init()
-}
-
 func main {
+    // Declare stop signals
+    // Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
+    grace.Init(syscall.SIGTERM)
+    // Register goroutine
     grace.Go(manager0)
     grace.Go(manager1)
+    // Never return
+    // Stopped when receiving stop signal
+    // or all goroutines are exit
     grace.Run()
 }
 
@@ -47,6 +51,7 @@ func manager1(ctx context.Context) {
                 return
             default:
         }
+        // start dynamic goroutine
         grace.Go(func(workLocal interface{}) func(ctx context.Context) {
             return func(ctx context.Context) { do(workLocal) }
         })
