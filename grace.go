@@ -58,6 +58,8 @@ func Go(g Goroutine) {
 func Run() {
 	mu.Lock()
 	defer mu.Unlock()
+	fmt.Printf("GRACE is running...\n")
+	fmt.Printf("GRACE stop signal %s \n", defaultStopSignal)
 	isRunning = true
 	ctx, cancel = context.WithCancel(context.Background())
 	for _, g := range sysGoroutines {
