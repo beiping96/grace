@@ -18,7 +18,7 @@ var (
 	}
 )
 
-// Init Declare stop signals
+// Init declare stop signals
 // Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
 func Init(stopSignals ...os.Signal) {
 	if len(stopSignals) == 0 {
@@ -36,10 +36,10 @@ var (
 	wg            = new(sync.WaitGroup)
 )
 
-// Goroutine Goroutine function
+// Goroutine function
 type Goroutine func(ctx context.Context)
 
-// Go Start a goroutine
+// Go start a goroutine
 func Go(g Goroutine) {
 	if isRunning {
 		wg.Add(1)
@@ -54,7 +54,7 @@ func Go(g Goroutine) {
 	mu.Unlock()
 }
 
-// Run Start node
+// Run start node
 func Run() {
 	mu.Lock()
 	defer mu.Unlock()
