@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/beiping96/grace.svg?branch=master)](https://travis-ci.com/beiping96/grace)
 [![GoDoc](https://godoc.org/github.com/beiping96/grace?status.svg)](https://godoc.org/github.com/beiping96/grace)
-[![codecov](https://codecov.io/gh/beiping96/grace/branch/master/graph/badge.svg)](https://codecov.io/gh/beiping96/grace)
+<!-- [![codecov](https://codecov.io/gh/beiping96/grace/branch/master/graph/badge.svg)](https://codecov.io/gh/beiping96/grace) -->
 [![Go Report Card](https://goreportcard.com/badge/github.com/beiping96/grace)](https://goreportcard.com/report/github.com/beiping96/grace)
 
 A graceful way to manage node and goroutines.
@@ -16,27 +16,31 @@ import (
     "github.com/beiping96/grace"
 )
 
-func main {
+func main() {
     // Declare stop signals
     // Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
-    grace.Init(syscall.SIGTERM)
+    grace.Init(syscall.SIGQUIT, syscall.SIGTERM)
+
     // Register goroutine
     grace.Go(manager0)
     grace.Go(manager1)
+
     // Never return
     // Stopped when receiving stop signal
     // or all goroutines are exit
     grace.Run()
 }
 
+func do(work interface{}) {}
+
 func manager0(ctx context.Context) {
     works := []interface{}{}
     for _, work := range works {
         select {
-            case <- ctx.Done():
-                // node receive stop signal
-                return
-            default:
+        case <-ctx.Done():
+            // receive stop signal
+            return
+        default:
         }
         do(work)
     }
@@ -46,25 +50,15 @@ func manager1(ctx context.Context) {
     works := []interface{}{}
     for _, work := range works {
         select {
-            case <- ctx.Done():
-                // node receive stop signal
-                return
-            default:
+        case <-ctx.Done():
+            // receive stop signal
+            return
+        default:
         }
         // start dynamic goroutine
-        grace.Go(func(workLocal interface{}) func(ctx context.Context) {
-            return func(ctx context.Context) { do(workLocal) }
-        })
+        func(workLocal interface{}) {
+            grace.Go(func(ctx context.Context) { do(workLocal) })
+        }(work)
     }
 }
-
-func do(work interface{}) {}
-
 ```
-
-## TODO
-
-- [x] Stop
-- [ ] Handle Stop
-- [ ] Restart
-- [ ] Handle Restart

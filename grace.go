@@ -32,7 +32,6 @@ var (
 	isRunning     = false
 	cancel        func()
 	ctx           context.Context
-	mu            = new(sync.Mutex)
 	wg            = new(sync.WaitGroup)
 )
 
@@ -41,23 +40,22 @@ type Goroutine func(ctx context.Context)
 
 // Go start a goroutine
 func Go(g Goroutine) {
-	if isRunning {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			g(ctx)
-		}()
+	if !isRunning {
+		sysGoroutines = append(sysGoroutines, g)
 		return
 	}
-	mu.Lock()
-	sysGoroutines = append(sysGoroutines, g)
-	mu.Unlock()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g(ctx)
+	}()
 }
 
 // Run start node
 func Run() {
-	mu.Lock()
-	defer mu.Unlock()
+	if isRunning {
+		panic("GRACE is running, PANIC run twice.")
+	}
 	fmt.Printf("GRACE is running...\n")
 	fmt.Printf("GRACE stop signal %s \n", defaultStopSignal)
 	isRunning = true
@@ -83,7 +81,7 @@ func Run() {
 		cancel()
 		fmt.Printf("GRACE waitting all goroutines exit...\n")
 		select {
-		case <-time.After(time.Duration(5) * time.Second):
+		case <-time.After(time.Duration(1) * time.Minute):
 		case <-allStopped:
 		}
 		fmt.Printf("GRACE stopped.\n")
