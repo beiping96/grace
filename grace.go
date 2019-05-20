@@ -16,6 +16,8 @@ var (
 		syscall.SIGQUIT,
 		syscall.SIGTERM,
 	}
+
+	defaultLogger = fmt.Printf
 )
 
 // Init declare stop signals
@@ -25,6 +27,10 @@ func Init(stopSignals ...os.Signal) {
 		panic("GRACE Init PANIC nil stopSignals")
 	}
 	defaultStopSignal = stopSignals
+}
+
+func Log(logger func(format string, a ...interface{}) (n int, err error)) {
+	defaultLogger = logger
 }
 
 var (
@@ -56,8 +62,10 @@ func Run() {
 	if isRunning {
 		panic("GRACE is running, PANIC run twice.")
 	}
-	fmt.Printf("GRACE is running...\n")
-	fmt.Printf("GRACE stop signal %s \n", defaultStopSignal)
+	defaultLogger("%s GRACE is running...\n",
+		time.Now())
+	defaultLogger("%s GRACE stop signal %s \n",
+		time.Now(), defaultStopSignal)
 	isRunning = true
 	ctx, cancel = context.WithCancel(context.Background())
 	for _, g := range sysGoroutines {
@@ -77,17 +85,22 @@ func Run() {
 	defer cancel()
 	select {
 	case s := <-signalChan:
-		fmt.Printf("GRACE receive stop signal %s \n", s)
+		defaultLogger("%s GRACE receive stop signal %s \n",
+			time.Now(), s)
 		cancel()
-		fmt.Printf("GRACE waitting all goroutines exit...\n")
+		defaultLogger("%s GRACE waitting all goroutines exit...\n",
+			time.Now())
 		select {
 		case <-time.After(time.Duration(1) * time.Minute):
 		case <-allStopped:
 		}
-		fmt.Printf("GRACE stopped.\n")
+		defaultLogger("%s GRACE stopped.\n",
+			time.Now())
 	case <-allStopped:
-		fmt.Printf("GRACE all goroutines exit...\n")
-		fmt.Printf("GRACE stopped.\n")
+		defaultLogger("%s GRACE all goroutines exit...\n",
+			time.Now())
+		defaultLogger("%s GRACE stopped.\n",
+			time.Now())
 	}
 	os.Exit(0)
 }
