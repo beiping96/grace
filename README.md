@@ -6,12 +6,13 @@
 
 <!-- [![codecov](https://codecov.io/gh/beiping96/grace/branch/master/graph/badge.svg)](https://codecov.io/gh/beiping96/grace) -->
 
-A graceful way to manage node and goroutines.
+A graceful way to manage node and goroutines. When running, it will listen system signals. After receiving stop signal, the context's cancel function will be called. If all goroutines are exit, node will stop immediately.
 
 ## Usage
 
 ``` go
 import (
+    "log"
     "context"
     "syscall"
     "github.com/beiping96/grace"
@@ -21,6 +22,10 @@ func main() {
     // Declare stop signals
     // Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
     grace.Init(syscall.SIGQUIT, syscall.SIGTERM)
+
+    // Log declare logger method
+    // Default is fmt.Printf
+    grace.Log(log.Printf)
 
     // Register goroutine
     grace.Go(manager0)
