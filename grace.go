@@ -17,7 +17,7 @@ var (
 		syscall.SIGTERM,
 	}
 
-	defaultLogger = fmt.Printf
+	defaultLogger = func(format string, a ...interface{}) { fmt.Printf(format, a...) }
 )
 
 // Init declare stop signals
@@ -29,7 +29,9 @@ func Init(stopSignals ...os.Signal) {
 	defaultStopSignal = stopSignals
 }
 
-func Log(logger func(format string, a ...interface{}) (n int, err error)) {
+// Log declare logger method
+// Default is fmt.Printf
+func Log(logger func(format string, a ...interface{})) {
 	defaultLogger = logger
 }
 
