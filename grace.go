@@ -115,8 +115,8 @@ func Run() {
 		}
 		pidFile = filepath.Join(dir, defaultPidDir, fmt.Sprintf("%d.pid", pid))
 	}
-	os.MkdirAll(filepath.Dir(pidFile), 0733)
-	err := ioutil.WriteFile(pidFile, []byte(strconv.Itoa(pid)), 0733)
+	os.MkdirAll(filepath.Dir(pidFile), 0777)
+	err := ioutil.WriteFile(pidFile, []byte(strconv.Itoa(pid)), 0777)
 	if err != nil {
 		panic(fmt.Errorf("GRACE pid monitor %s %v", pidFile, err))
 	}
