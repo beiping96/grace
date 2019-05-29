@@ -3,8 +3,11 @@ package grace
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -18,6 +21,8 @@ var (
 	}
 
 	defaultLogger = func(format string, a ...interface{}) { fmt.Printf(format, a...) }
+
+	defaultPidDir = "pid/"
 )
 
 // Init declare stop signals
@@ -26,13 +31,28 @@ func Init(stopSignals ...os.Signal) {
 	if len(stopSignals) == 0 {
 		panic("GRACE Init PANIC nil stopSignals")
 	}
+	if isRunning {
+		panic("GRACE is running, PANIC set stop signals after running.")
+	}
 	defaultStopSignal = stopSignals
 }
 
 // Log declare logger method
 // Default is fmt.Printf
 func Log(logger func(format string, a ...interface{})) {
+	if isRunning {
+		panic("GRACE is running, PANIC set log after running.")
+	}
 	defaultLogger = logger
+}
+
+// PID configure pid file path
+// Default is ./pid/
+func PID(path string) {
+	if isRunning {
+		panic("GRACE is running, PANIC set pid dir after running.")
+	}
+	defaultPidDir = path
 }
 
 var (
@@ -85,6 +105,28 @@ func Run() {
 		allStopped <- struct{}{}
 	}()
 	defer cancel()
+
+	pid := os.Getpid()
+	pidFile := filepath.Join(defaultPidDir, fmt.Sprintf("%d.pid", pid))
+	if !filepath.IsAbs(defaultPidDir) {
+		dir, err := os.Getwd()
+		if err != nil {
+			panic(fmt.Errorf("GRACE pid os.Getwd %v", err))
+		}
+		pidFile = filepath.Join(dir, defaultPidDir, fmt.Sprintf("%d.pid", pid))
+	}
+	_ = os.MkdirAll(filepath.Base(pidFile), 0733)
+	err := ioutil.WriteFile(pidFile, []byte(strconv.Itoa(pid)), 0733)
+	if err != nil {
+		panic(fmt.Errorf("GRACE pid monitor %s %v", pidFile, err))
+	}
+	defer func() {
+		err := os.Remove(pidFile)
+		if err != nil {
+			panic(fmt.Errorf("GRACE pid exit %s %v", pidFile, err))
+		}
+	}()
+
 	select {
 	case s := <-signalChan:
 		defaultLogger("%s GRACE receive stop signal %s \n",
@@ -104,5 +146,4 @@ func Run() {
 		defaultLogger("%s GRACE stopped.\n",
 			time.Now())
 	}
-	os.Exit(0)
 }
