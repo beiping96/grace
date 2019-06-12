@@ -103,6 +103,7 @@ func Run() {
 	go func() {
 		wg.Wait()
 		allStopped <- struct{}{}
+		close(allStopped)
 	}()
 	defer cancel()
 
@@ -127,23 +128,36 @@ func Run() {
 		}
 	}()
 
-	select {
-	case s := <-signalChan:
-		defaultLogger("%s GRACE receive stop signal %s \n",
-			time.Now(), s)
-		cancel()
-		defaultLogger("%s GRACE waitting all goroutines exit...\n",
-			time.Now())
+	times := 0
+	for {
 		select {
-		case <-time.After(time.Duration(1) * time.Minute):
+		case s := <-signalChan:
+			times++
+			if times > 5 {
+				defaultLogger("%s GRACE stopped by killed.\n",
+					time.Now())
+				return
+			}
+			defaultLogger("%s GRACE receive stop signal %s \n",
+				time.Now(), s)
+			go func() {
+				cancel()
+				defaultLogger("%s GRACE waitting all goroutines exit...\n",
+					time.Now())
+				select {
+				case <-time.After(time.Duration(1) * time.Minute):
+				case <-allStopped:
+				}
+				defaultLogger("%s GRACE stopped.\n",
+					time.Now())
+				os.Exit(0)
+			}()
 		case <-allStopped:
+			defaultLogger("%s GRACE all goroutines exit...\n",
+				time.Now())
+			defaultLogger("%s GRACE stopped.\n",
+				time.Now())
+			return
 		}
-		defaultLogger("%s GRACE stopped.\n",
-			time.Now())
-	case <-allStopped:
-		defaultLogger("%s GRACE all goroutines exit...\n",
-			time.Now())
-		defaultLogger("%s GRACE stopped.\n",
-			time.Now())
 	}
 }
