@@ -128,12 +128,12 @@ func Run() {
 		}
 	}()
 
-	times := 0
+	times := 5
 	for {
 		select {
 		case s := <-signalChan:
-			times++
-			if times > 5 {
+			times--
+			if times <= 0 {
 				defaultLogger("%s GRACE stopped by killed.\n",
 					time.Now())
 				return
