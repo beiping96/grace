@@ -59,8 +59,11 @@ var (
 	sysGoroutines = []Goroutine{}
 	isRunning     = false
 	cancel        func()
-	ctx           context.Context
 	wg            = new(sync.WaitGroup)
+)
+
+var (
+	CTX context.Context
 )
 
 // Goroutine function
@@ -75,7 +78,7 @@ func Go(g Goroutine) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		g(ctx)
+		g(CTX)
 	}()
 }
 
@@ -89,12 +92,12 @@ func Run() {
 	defaultLogger("%s GRACE stop signal %s \n",
 		time.Now(), defaultStopSignal)
 	isRunning = true
-	ctx, cancel = context.WithCancel(context.Background())
+	CTX, cancel = context.WithCancel(context.Background())
 	for _, g := range sysGoroutines {
 		wg.Add(1)
 		go func(goroutine Goroutine) {
 			defer wg.Done()
-			goroutine(ctx)
+			goroutine(CTX)
 		}(g)
 	}
 	signalChan := make(chan os.Signal, 1)
