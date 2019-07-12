@@ -22,7 +22,7 @@ var (
 
 	defaultLogger = func(format string, a ...interface{}) { fmt.Printf(format, a...) }
 
-	defaultPidDir = "pid/"
+	defaultPidDir *string = nil
 )
 
 // Init declare stop signals
@@ -47,12 +47,12 @@ func Log(logger func(format string, a ...interface{})) {
 }
 
 // PID configure pid file path
-// Default is ./pid/
+// Default is unable
 func PID(path string) {
 	if isRunning {
 		panic("GRACE is running, PANIC set pid dir after running.")
 	}
-	defaultPidDir = path
+	defaultPidDir = &path
 }
 
 var (
@@ -83,7 +83,10 @@ func Go(g Goroutine) {
 }
 
 // Run start node
-func Run() {
+func Run(exitExpire time.Duration) {
+	if exitExpire <= 0 {
+		exitExpire = time.Minute
+	}
 	if isRunning {
 		panic("GRACE is running, PANIC run twice.")
 	}
@@ -110,26 +113,29 @@ func Run() {
 	}()
 	defer cancel()
 
-	pid := os.Getpid()
-	pidFile := filepath.Join(defaultPidDir, fmt.Sprintf("%d.pid", pid))
-	if !filepath.IsAbs(defaultPidDir) {
-		dir, err := os.Getwd()
-		if err != nil {
-			panic(fmt.Errorf("GRACE pid os.Getwd %v", err))
+	if defaultPidDir != nil && len(*defaultPidDir) != 0 {
+		pidDir := *defaultPidDir
+		pid := os.Getpid()
+		pidFile := filepath.Join(pidDir, fmt.Sprintf("%d.pid", pid))
+		if !filepath.IsAbs(pidDir) {
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(fmt.Errorf("GRACE pid os.Getwd %v", err))
+			}
+			pidFile = filepath.Join(dir, pidDir, fmt.Sprintf("%d.pid", pid))
 		}
-		pidFile = filepath.Join(dir, defaultPidDir, fmt.Sprintf("%d.pid", pid))
-	}
-	os.MkdirAll(filepath.Dir(pidFile), 0777)
-	err := ioutil.WriteFile(pidFile, []byte(strconv.Itoa(pid)), 0777)
-	if err != nil {
-		panic(fmt.Errorf("GRACE pid monitor %s %v", pidFile, err))
-	}
-	defer func() {
-		err := os.Remove(pidFile)
+		os.MkdirAll(filepath.Dir(pidFile), 0777)
+		err := ioutil.WriteFile(pidFile, []byte(strconv.Itoa(pid)), 0777)
 		if err != nil {
-			panic(fmt.Errorf("GRACE pid exit %s %v", pidFile, err))
+			panic(fmt.Errorf("GRACE pid monitor %s %v", pidFile, err))
 		}
-	}()
+		defer func() {
+			err := os.Remove(pidFile)
+			if err != nil {
+				panic(fmt.Errorf("GRACE pid exit %s %v", pidFile, err))
+			}
+		}()
+	}
 
 	select {
 	case s := <-signalChan:
@@ -139,7 +145,7 @@ func Run() {
 		defaultLogger("%s GRACE waitting all goroutines exit...\n",
 			time.Now())
 		select {
-		case <-time.After(time.Duration(1) * time.Minute):
+		case <-time.After(exitExpire):
 		case <-allStopped:
 		}
 		defaultLogger("%s GRACE stopped.\n",

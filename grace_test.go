@@ -4,6 +4,7 @@ import (
 	"context"
 	"syscall"
 	"testing"
+	"time"
 )
 
 func TestAll(t *testing.T) {
@@ -17,5 +18,5 @@ func TestAll(t *testing.T) {
 			t.Log("dynamic goroutine running")
 		})
 	})
-	Run()
+	Run(time.Second)
 }
