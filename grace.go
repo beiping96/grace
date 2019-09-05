@@ -70,9 +70,14 @@ var (
 type Goroutine func(ctx context.Context)
 
 // Go start a goroutine
-func Go(g Goroutine) {
+func Go(g Goroutine, options ...Option) {
+	wrapG := g
+	for _, option := range options {
+		wrapG = option.wrap(wrapG)
+	}
+
 	if !isRunning {
-		sysGoroutines = append(sysGoroutines, g)
+		sysGoroutines = append(sysGoroutines, wrapG)
 		return
 	}
 	wg.Add(1)
