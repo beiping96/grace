@@ -15,6 +15,7 @@ import (
     "log"
     "context"
     "syscall"
+    "time"
     "github.com/beiping96/grace"
 )
 
@@ -34,7 +35,7 @@ func main() {
     // Never return
     // Stopped when receiving stop signal
     // or all goroutines are exit
-    grace.Run()
+    grace.Run(time.Second)
 }
 
 func do(work interface{}) {}
