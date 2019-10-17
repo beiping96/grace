@@ -11,6 +11,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	_ "go.uber.org/automaxprocs"
 )
 
 var (
