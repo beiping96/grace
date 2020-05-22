@@ -186,7 +186,7 @@ import (
 func main() {
     // Declare stop signals
     // Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
-    grace.Singal(syscall.SIGQUIT, syscall.SIGTERM)
+    grace.Signal(syscall.SIGQUIT, syscall.SIGTERM)
 
     // Declare logger method
     // Default is os.Stdout
