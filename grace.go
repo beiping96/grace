@@ -72,9 +72,9 @@ var (
 type Goroutine func(ctx context.Context)
 
 // Go start a goroutine
-func Go(g Goroutine, options ...Option) {
+func Go(g Goroutine, opts ...Option) {
 	wrapG := g
-	for _, option := range options {
+	for _, option := range opts {
 		wrapG = option.wrap(wrapG)
 	}
 
@@ -153,14 +153,14 @@ func Run(exitExpire time.Duration) {
 			time.Now())
 		select {
 		case <-time.After(exitExpire):
+			defaultLogger("%s GRACE stopped (expired).\n",
+				time.Now())
 		case <-allStopped:
+			defaultLogger("%s GRACE stopped (all goroutines exit).\n",
+				time.Now())
 		}
-		defaultLogger("%s GRACE stopped.\n",
-			time.Now())
 	case <-allStopped:
-		defaultLogger("%s GRACE all goroutines exit...\n",
-			time.Now())
-		defaultLogger("%s GRACE stopped.\n",
+		defaultLogger("%s GRACE stopped (all goroutines exit).\n",
 			time.Now())
 	}
 }
