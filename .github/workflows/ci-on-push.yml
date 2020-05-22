@@ -25,5 +25,11 @@ jobs:
       - name: Build
         run: go build -v .
 
-      - name: Test
-        run: go test -race
+      - name: TestGrace
+        run: go test -race -run TestGrace
+
+      - name: TestOptionExpire
+        run: go test -race -run TestOptionExpire
+
+      - name: TestOptionRestart
+        run: go test -race -run TestOptionRestart

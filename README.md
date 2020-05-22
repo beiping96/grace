@@ -4,7 +4,8 @@
 [![GoDoc](https://godoc.org/github.com/beiping96/grace?status.svg)](https://pkg.go.dev/github.com/beiping96/grace)
 [![Go Report Card](https://goreportcard.com/badge/github.com/beiping96/grace)](https://goreportcard.com/report/github.com/beiping96/grace)
 [![CI On Push](https://github.com/beiping96/grace/workflows/CI-On-Push/badge.svg)](https://github.com/beiping96/grace/actions)
-[![codecov](https://codecov.io/gh/beiping96/grace/branch/master/graph/badge.svg)](https://codecov.io/gh/beiping96/grace)
+
+<!-- [![codecov](https://codecov.io/gh/beiping96/grace/branch/master/graph/badge.svg)](https://codecov.io/gh/beiping96/grace) -->
 
 Grace manages long-running goroutines gracefully by trapping system signals and canceling `context.Context`.
 
