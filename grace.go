@@ -27,41 +27,41 @@ var (
 	defaultPidDir *string = nil
 )
 
-// Init declare stop signals
+// Signal declare stop signals
 // Default is syscall.SIGINT, syscall.SIGQUIT or syscall.SIGTERM
-func Init(stopSignals ...os.Signal) {
+func Signal(stopSignals ...os.Signal) {
 	if len(stopSignals) == 0 {
-		panic("GRACE Init PANIC nil stopSignals")
+		panic("GRACE PANIC nil stopSignals")
 	}
 	if isRunning {
-		panic("GRACE is running, PANIC set stop signals after running.")
+		panic("GRACE PANIC set stop signals after running.")
 	}
 	defaultStopSignal = stopSignals
 }
 
 // Log declare logger method
-// Default is fmt.Printf
+// Default is os.Stdout
 func Log(logger func(format string, a ...interface{})) {
 	if isRunning {
-		panic("GRACE is running, PANIC set log after running.")
+		panic("GRACE PANIC set log after running.")
 	}
 	defaultLogger = logger
 }
 
-// PID configure pid file path
+// PID configure process file folder
 // Default is unable
 func PID(path string) {
 	if isRunning {
-		panic("GRACE is running, PANIC set pid dir after running.")
+		panic("GRACE PANIC set pid dir after running.")
 	}
 	defaultPidDir = &path
 }
 
 var (
-	sysGoroutines = []Goroutine{}
-	isRunning     = false
+	sysGoroutines []Goroutine
+	isRunning     bool
 	cancel        func()
-	wg            = new(sync.WaitGroup)
+	wg            sync.WaitGroup
 )
 
 var (
@@ -74,7 +74,8 @@ type Goroutine func(ctx context.Context)
 // Go start a goroutine
 func Go(g Goroutine, opts ...Option) {
 	wrapG := g
-	for _, option := range opts {
+	for i := len(opts) - 1; i >= 0; i-- {
+		option := opts[i]
 		wrapG = option.wrap(wrapG)
 	}
 
@@ -85,7 +86,7 @@ func Go(g Goroutine, opts ...Option) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		g(CTX)
+		wrapG(CTX)
 	}()
 }
 
@@ -103,7 +104,7 @@ func Run(exitExpire time.Duration) {
 		exitExpire = time.Minute
 	}
 	if isRunning {
-		panic("GRACE is running, PANIC run twice.")
+		panic("GRACE PANIC run twice.")
 	}
 	defaultLogger("%s GRACE is running...\n",
 		time.Now())
