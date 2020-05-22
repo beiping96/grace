@@ -60,7 +60,7 @@ import(
 )
 
 func main() {
-	// Register puber
+    // Register puber
     grace.Go(puber)
     // Register 2 suber
     for i := 0; i < 2; i++ { 
@@ -123,7 +123,7 @@ func httpd(ctx context.Context) {
 }
 
 func main() {
-	// Register httpd
+    // Register httpd
     grace.Go(httpd)
     
     // Start
