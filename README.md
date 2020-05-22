@@ -7,7 +7,7 @@
 
 <!-- [![codecov](https://codecov.io/gh/beiping96/grace/branch/master/graph/badge.svg)](https://codecov.io/gh/beiping96/grace) -->
 
-A graceful way to manage node and goroutines. When running, it will listen system signals. After receiving stop signal, the context's cancel function will be called. If all goroutines are exit, node will stop immediately.
+A graceful way to manage nodes and goroutines. When running, it will listen system signals. After receiving stop signal or expired, the context's cancel function will be called. If all goroutines are exit, node will stop immediately.
 
 ## Usage
 

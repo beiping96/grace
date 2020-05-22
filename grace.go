@@ -89,6 +89,14 @@ func Go(g Goroutine, opts ...Option) {
 	}()
 }
 
+//type Serve interface{
+//	ListenAndServe() error
+//	Shutdown(ctx context.Context)
+//}
+//
+//// GoServe start a server
+//func GoServe(s Serve, opts ...Option) {}
+
 // Run start node
 func Run(exitExpire time.Duration) {
 	if exitExpire <= 0 {
